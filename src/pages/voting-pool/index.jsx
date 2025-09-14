@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/ui/Header';
 import VotingCampaignCard from './components/VotingCampaignCard';
 import { db } from '../../firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const VotingPool = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -11,7 +11,8 @@ const VotingPool = () => {
   const categories = ["All", "Food & Beverages", "Electronics", "Fashion", "Home Appliances"];
 
   useEffect(() => {
-    const q = query(collection(db, "campaigns"), where("isApproved", "==", false));
+    // Fetch all campaigns and filter on the client
+    const q = query(collection(db, "campaigns"));
     const unsubscribe = onSnapshot(q, snapshot => {
       setCampaigns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
@@ -27,7 +28,13 @@ const VotingPool = () => {
     const newUpvotes = voteType === 'upvote' ? campaign.upvotes + 1 : campaign.upvotes;
     const newDownvotes = voteType === 'downvote' ? campaign.downvotes + 1 : campaign.downvotes;
 
-    await updateDoc(campaignRef, { upvotes: newUpvotes, downvotes: newDownvotes });
+    // Ensure isApproved is set to false if it's missing
+    const isApproved = campaign.isApproved === true; // Keep it true if it's already true
+    await updateDoc(campaignRef, { 
+      upvotes: newUpvotes, 
+      downvotes: newDownvotes,
+      isApproved: isApproved
+    });
 
     if (newUpvotes >= 5) {
       await updateDoc(campaignRef, { isApproved: true });
@@ -35,7 +42,9 @@ const VotingPool = () => {
     }
   };
 
+  // Filter campaigns on the client-side
   const filteredCampaigns = campaigns.filter(c => {
+    if (c.isApproved === true) return false; // Exclude approved campaigns
     if (categoryFilter !== 'All' && c.category !== categoryFilter) return false;
     if (timeFilter === 'new') return true; // optional, could sort
     return true;

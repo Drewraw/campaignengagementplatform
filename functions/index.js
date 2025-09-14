@@ -21,15 +21,24 @@ exports.createCampaign = functions.https.onRequest(async (req, res) => {
       return res.status(405).send("Method Not Allowed");
     }
 
-    try {
-      const {title, description, product, creator} = req.body;
+    console.log("Request body:", JSON.stringify(req.body));
 
-      if (!title || !description || !product || !product.name || !creator ||
-        !creator.id || !creator.name) {
+    try {
+      const {title, description, category, tags, creator} = req.body;
+
+      if (
+        !title ||
+        !description ||
+        !category ||
+        !tags ||
+        !Array.isArray(tags) ||
+        tags.length < 2 ||
+        !creator ||
+        !creator.id ||
+        !creator.name
+      ) {
         return res.status(400).send(
-            "Missing required campaign data. " +
-            "Ensure title, description, product name, and creator details " +
-            "are provided.",
+            "Missing or invalid required campaign data.",
         );
       }
 
@@ -37,11 +46,13 @@ exports.createCampaign = functions.https.onRequest(async (req, res) => {
       const newCampaign = {
         title,
         description,
-        product,
+        category,
+        tags,
         creator,
         upvotes: 0,
         downvotes: 0,
         status: "voting", // Initial status
+        isApproved: false, // For voting pool
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       };
 
@@ -58,8 +69,10 @@ exports.getCampaigns = functions.https.onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
       const {status} = req.query;
-      const filter = status ? {key: "status", value: status} : undefined;
-      const campaigns = await getCollection("campaigns", filter);
+      const campaigns = await getCollection(
+          "campaigns",
+          status ? {key: "status", value: status} : undefined,
+      );
       res.status(200).json(campaigns);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
@@ -91,7 +104,7 @@ exports.vote = functions.https.onRequest(async (req, res) => {
         }
 
         const data = doc.data();
-        let {upvotes = 0, downvotes = 0, status} = data;
+        let {upvotes = 0, downvotes = 0, status, isApproved} = data;
 
         if (voteType === "upvote") {
           upvotes += 1;
@@ -99,11 +112,17 @@ exports.vote = functions.https.onRequest(async (req, res) => {
           downvotes += 1;
         }
 
-        if (upvotes >= 10 && status === "voting") {
+        if (upvotes >= 5 && status === "voting") {
           status = "active";
+          isApproved = true;
         }
 
-        transaction.update(campaignRef, {upvotes, downvotes, status});
+        transaction.update(campaignRef, {
+          upvotes,
+          downvotes,
+          status,
+          isApproved,
+        });
       });
 
       res.status(200).send({message: "Vote successful"});
@@ -217,7 +236,7 @@ exports.getUserProfileData = functions.https.onRequest(async (req, res) => {
       const userDoc = await db.collection("users").doc(userId).get();
 
       if (!userDoc.exists) {
-        return res.status(404).send("User not found");
+        return res.status(404).send("User not. found");
       }
 
       const user = {id: userDoc.id, ...userDoc.data()};
