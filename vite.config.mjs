@@ -16,6 +16,12 @@ export default defineConfig({
     port: "4028",
     host: "0.0.0.0",
     strictPort: true,
-    allowedHosts: ['.amazonaws.com', '.builtwithrocket.new']
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:5001/pro2-5f35b/us-central1",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   }
 });

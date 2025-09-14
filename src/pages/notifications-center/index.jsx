@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../../components/ui/Header';
 import NotificationItem from './components/NotificationItem';
 import NotificationFilters from './components/NotificationFilters';
@@ -52,114 +53,22 @@ const NotificationsCenter = () => {
     }
   });
 
-  // Mock notifications data
-  const mockNotifications = [
-    {
-      id: 1,
-      type: 'campaign_milestone',
-      title: 'Campaign milestone reached!',
-      message: 'Your campaign "Premium Wireless Headphones" has reached 75% of its target with 150 supporters.',
-      timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-      isRead: false,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-      senderName: 'Campaign System',
-      campaignTitle: 'Premium Wireless Headphones',
-      actionUrl: '/campaign-details?id=1'
-    },
-    {
-      id: 2,
-      type: 'new_supporter',
-      title: 'New supporter joined!',
-      message: 'Sarah Johnson joined your campaign "Eco-Friendly Water Bottles". You now have 89 supporters!',
-      timestamp: new Date(Date.now() - 900000), // 15 minutes ago
-      isRead: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face',
-      senderName: 'Sarah Johnson',
-      campaignTitle: 'Eco-Friendly Water Bottles',
-      actionUrl: '/campaign-details?id=2'
-    },
-    {
-      id: 3,
-      type: 'comment',
-      title: 'New comment on your campaign',
-      message: 'Mike Chen commented: "This looks amazing! When do you expect to reach the target?"',
-      timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
-      isRead: true,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-      senderName: 'Mike Chen',
-      campaignTitle: 'Smart Home Security System',
-      actionUrl: '/campaign-details?id=3'
-    },
-    {
-      id: 4,
-      type: 'campaign_complete',
-      title: 'Campaign completed successfully!',
-      message: 'Congratulations! Your campaign "Organic Coffee Subscription" reached its target. Coupon codes have been distributed.',
-      timestamp: new Date(Date.now() - 3600000), // 1 hour ago
-      isRead: false,
-      avatar: null,
-      senderName: null,
-      campaignTitle: 'Organic Coffee Subscription',
-      actionUrl: '/campaign-details?id=4'
-    },
-    {
-      id: 5,
-      type: 'like',
-      title: 'Someone liked your campaign',
-      message: 'Emma Wilson and 3 others liked your campaign "Sustainable Fashion Collection".',
-      timestamp: new Date(Date.now() - 7200000), // 2 hours ago
-      isRead: true,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
-      senderName: 'Emma Wilson',
-      campaignTitle: 'Sustainable Fashion Collection',
-      actionUrl: '/campaign-details?id=5'
-    },
-    {
-      id: 6,
-      type: 'system',
-      title: 'New feature available',
-      message: 'We\'ve added campaign analytics! Track your campaign performance with detailed insights and metrics.',
-      timestamp: new Date(Date.now() - 86400000), // 1 day ago
-      isRead: true,
-      avatar: null,
-      senderName: null,
-      campaignTitle: null,
-      actionUrl: '/user-profile?tab=analytics'
-    },
-    {
-      id: 7,
-      type: 'brand_message',
-      title: 'Message from TechGear Pro',
-      message: 'Thank you for supporting our campaign! We\'re excited to share exclusive updates about our upcoming product launch.',
-      timestamp: new Date(Date.now() - 172800000), // 2 days ago
-      isRead: true,
-      avatar: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=40&h=40&fit=crop&crop=center',
-      senderName: 'TechGear Pro',
-      campaignTitle: 'Next-Gen Gaming Accessories',
-      actionUrl: '/brand-dashboard?brand=techgear-pro'
-    },
-    {
-      id: 8,
-      type: 'campaign_milestone',
-      title: 'Campaign milestone reached!',
-      message: 'The campaign "Artisan Coffee Roasters" you joined has reached 50% of its target!',
-      timestamp: new Date(Date.now() - 259200000), // 3 days ago
-      isRead: true,
-      avatar: null,
-      senderName: null,
-      campaignTitle: 'Artisan Coffee Roasters',
-      actionUrl: '/campaign-details?id=6'
-    }
-  ];
-
   // Initialize notifications
   useEffect(() => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setNotifications(mockNotifications);
-      setIsLoading(false);
-    }, 1000);
+    const fetchNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get('/api/getNotifications');
+        setNotifications(response.data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        // In a real app, you might want to set an error state here
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotifications();
   }, []);
 
   // Filter notifications based on active filter and search query
@@ -254,97 +163,62 @@ const NotificationsCenter = () => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
-    setIsSearching(false);
   };
-
-  const handleUpdateSettings = (newSettings) => {
-    setNotificationSettings(newSettings);
-    // Here you would typically save to backend
-    console.log('Updated notification settings:', newSettings);
-  };
-
-  const unreadCount = notifications?.filter(n => !n?.isRead)?.length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="notifications-center">
       <Header />
-      <div className="pt-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Search Header */}
-          <NotificationSearch
-            onSearch={handleSearch}
-            onClear={handleClearSearch}
-            isSearching={isSearching}
-          />
-
-          {/* Filters and Actions */}
-          <NotificationFilters
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-            unreadCount={unreadCount}
-            onMarkAllAsRead={handleMarkAllAsRead}
-            onClearAll={handleClearAll}
-          />
-
-          {/* Settings Button */}
-          <div className="bg-card border-b border-border px-4 py-2">
-            <div className="flex justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSettingsOpen(true)}
-                className="flex items-center space-x-2"
-              >
-                <Icon name="Settings" size={16} />
-                <span>Settings</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Notifications List */}
-          <div className="bg-card">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-muted-foreground">Loading notifications...</span>
-                </div>
-              </div>
-            ) : filteredNotifications?.length === 0 ? (
-              <EmptyNotifications filterType={activeFilter} />
-            ) : (
-              <div className="divide-y divide-border">
-                {filteredNotifications?.map((notification) => (
-                  <div key={notification?.id} className="group">
-                    <NotificationItem
-                      notification={notification}
-                      onMarkAsRead={handleMarkAsRead}
-                      onDelete={handleDeleteNotification}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Load More Button */}
-          {filteredNotifications?.length > 0 && !isLoading && (
-            <div className="bg-card border-t border-border p-6 text-center">
-              <Button variant="outline" className="flex items-center space-x-2">
-                <Icon name="RotateCcw" size={16} />
-                <span>Load more notifications</span>
-              </Button>
-            </div>
-          )}
-        </div>
+      <div className="notifications-center__header">
+        <h1>Notifications</h1>
+        <Button onClick={() => setIsSettingsOpen(true)}>
+          <Icon name="settings" />
+          Settings
+        </Button>
       </div>
-      {/* Settings Modal */}
-      <NotificationSettings
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        settings={notificationSettings}
-        onUpdateSettings={handleUpdateSettings}
+
+      <NotificationSearch
+        onSearch={handleSearch}
+        onClear={handleClearSearch}
+        isSearching={isSearching}
+        searchQuery={searchQuery}
       />
+
+      <NotificationFilters
+        activeFilter={activeFilter}
+        onFilterChange={handleFilterChange}
+        onMarkAllAsRead={handleMarkAllAsRead}
+        onClearAll={handleClearAll}
+        hasUnread={notifications.some(n => !n.isRead)}
+      />
+
+      {isLoading ? (
+        <p>Loading notifications...</p>
+      ) : filteredNotifications.length > 0 ? (
+        <div className="notifications-list">
+          {filteredNotifications.map(notification => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              onMarkAsRead={handleMarkAsRead}
+              onDelete={handleDeleteNotification}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyNotifications />
+      )}
+
+      {isSettingsOpen && (
+        <NotificationSettings
+          settings={notificationSettings}
+          onClose={() => setIsSettingsOpen(false)}
+          onSave={(newSettings) => {
+            setNotificationSettings(newSettings);
+            setIsSettingsOpen(false);
+            // Here you would typically save the settings to a backend
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
@@ -36,17 +37,13 @@ const ActivityFeed = ({ activities }) => {
         return 'text-muted-foreground bg-muted';
     }
   };
-
-  const formatTimeAgo = (timestamp) => {
-    const now = new Date();
-    const activityTime = new Date(timestamp);
-    const diffInMinutes = Math.floor((now - activityTime) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
-    return `${Math.floor(diffInMinutes / 1440)}d ago`;
-  };
+  
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    // Firestore timestamps are objects with seconds and nanoseconds.
+    // new Date() can take the seconds value * 1000 to get milliseconds.
+    return formatDistanceToNow(new Date(timestamp.seconds * 1000), { addSuffix: true });
+  }
 
   if (!activities || activities?.length === 0) {
     return (
@@ -78,7 +75,7 @@ const ActivityFeed = ({ activities }) => {
                 </p>
               </div>
               <span className="text-xs text-muted-foreground flex-shrink-0">
-                {formatTimeAgo(activity?.timestamp)}
+                {formatTimestamp(activity?.timestamp)}
               </span>
             </div>
 

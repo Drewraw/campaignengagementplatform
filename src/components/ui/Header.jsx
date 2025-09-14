@@ -13,6 +13,7 @@ const Header = () => {
   const primaryNavItems = [
     { label: 'Timeline', path: '/timeline-feed', icon: 'Home' },
     { label: 'Explore', path: '/campaign-details', icon: 'Search' },
+    { label: 'Voting', path: '/voting-pool', icon: 'ThumbsUp' },
     { label: 'Create', path: '/create-campaign', icon: 'Plus' },
     { label: 'Profile', path: '/user-profile', icon: 'User' },
     { label: 'Notifications', path: '/notifications-center', icon: 'Bell' }
