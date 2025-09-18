@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/ui/Header';
 import CampaignCard from './components/CampaignCard'
-import { db } from '../../firebase';
+import { firestore as db } from '../../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 const TimelineFeed = () => {

@@ -16,7 +16,8 @@ const Header = () => {
     { label: 'Voting', path: '/voting-pool', icon: 'ThumbsUp' },
     { label: 'Create', path: '/create-campaign', icon: 'Plus' },
     { label: 'Profile', path: '/user-profile', icon: 'User' },
-    { label: 'Notifications', path: '/notifications-center', icon: 'Bell' }
+    { label: 'Notifications', path: '/notifications-center', icon: 'Bell' },
+    { label: 'Feedback', path: '/feedback', icon: 'MessageSquare' }
   ];
 
   const secondaryNavItems = [

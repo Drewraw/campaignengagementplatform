@@ -40,6 +40,11 @@ const Sidebar = ({ isCollapsed = false, onToggleCollapse }) => {
       path: '/notifications-center', 
       icon: 'Bell',
       notificationKey: 'notifications'
+    },
+    {
+      label: 'Feedback',
+      path: '/feedback',
+      icon: 'MessageSquare'
     }
   ];
 

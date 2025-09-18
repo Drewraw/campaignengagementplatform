@@ -1,79 +1,26 @@
-      import React from "react";
-      import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-      import TimelineFeed from "./pages/timeline-feed";
-      import VotingPool from "./pages/voting-pool";
-      import CampaignForm from './pages/user-led-campaigns/components/CampaignForm';
-      import UserProfile from "./pages/user-profile";
-      import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import TimelineFeed from './pages/timeline-feed';
+import VotingPool from './pages/voting-pool';
+import UserProfile from './pages/user-profile';
+import LoginPage from './pages/login';
+import CreateCampaignPage from './pages/user-led-campaigns';
+import PrivateRoute from './components/PrivateRoute';
+import FeedbackPage from './pages/feedback/FeedbackPage';
 
+export default function AppRoutes({ currentUser }) {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<TimelineFeed />} />
+      <Route path="/voting-pool" element={<VotingPool />} />
+      <Route path="/user-profile/:userId" element={<UserProfile />} />
 
-      const currentUser = {
-        id: "2",
-        name: "Jane Doe",
-        username: "jane.doe",
-        role: "creator", 
-      };
-
-      const CreateCampaignPage = () => {
-        const navigate = useNavigate();
-
-        const handleCampaignSubmit = async (campaignData) => {
-          try {
-            const response = await fetch('/api/createCampaign', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                ...campaignData,
-                creator: {
-                  id: currentUser.id,
-                  name: currentUser.name,
-                }
-              }),
-            });
-
-            if (response.ok) {
-              navigate('/voting-pool');
-            } else {
-              console.error('Failed to create campaign');
-            }
-          } catch (error) {
-            console.error('Error creating campaign:', error);
-          }
-        };
-
-        return <CampaignForm onSubmit={handleCampaignSubmit} />;
-      }
-
-      export default function AppRoutes() {
-        return (
-          <Router>
-            <Routes>
-              {/* Timeline Feed */}
-              <Route
-                path="/"
-                element={<TimelineFeed currentUser={currentUser} />}
-              />
-      
-              {/* Voting Pool */}
-              <Route
-                path="/voting-pool"
-                element={<VotingPool currentUser={currentUser} />}
-              />
-
-              {/* Create Campaign */}
-              <Route
-                path="/create-campaign"
-                element={<CreateCampaignPage />}
-              />
-
-              {/* User Profile */}
-              <Route
-                path="/user-profile/:userId"
-                element={<UserProfile currentUser={currentUser} />}
-              />
-            </Routes>
-          </Router>
-        );
-      }
+      {/* Private Routes */}
+      <Route element={<PrivateRoute currentUser={currentUser} />}>
+        <Route path="/create-campaign" element={<CreateCampaignPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
+      </Route>
+    </Routes>
+  );
+}

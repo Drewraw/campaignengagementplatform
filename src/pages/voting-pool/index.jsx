@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/ui/Header';
 import VotingCampaignCard from './components/VotingCampaignCard';
-import { db } from '../../firebase';
+import { firestore as db } from '../../firebase';
 import { collection, query, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const VotingPool = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [timeFilter, setTimeFilter] = useState('all');
-  const categories = ["All", "Food & Beverages", "Electronics", "Fashion", "Home Appliances"];
+  const categories = ["All", "Food","Beverages", "Electronics", "Fashion", "Home Appliances","travel"];
 
   useEffect(() => {
     // Fetch all campaigns and filter on the client
