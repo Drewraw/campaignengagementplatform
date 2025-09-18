@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom';
 import TimelineFeed from './pages/timeline-feed';
 import VotingPool from './pages/voting-pool';
 import UserProfile from './pages/user-profile';
-import LoginPage from './pages/login';
 import CreateCampaignPage from './pages/user-led-campaigns';
 import PrivateRoute from './components/PrivateRoute';
 import FeedbackPage from './pages/feedback/FeedbackPage';
@@ -11,7 +10,6 @@ import FeedbackPage from './pages/feedback/FeedbackPage';
 export default function AppRoutes({ currentUser }) {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<TimelineFeed />} />
       <Route path="/voting-pool" element={<VotingPool />} />
       <Route path="/user-profile/:userId" element={<UserProfile />} />
